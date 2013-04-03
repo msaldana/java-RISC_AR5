@@ -1,6 +1,7 @@
 package uprm.ece.icom4215.components;
 
 
+
 import java.util.HashMap;
 
 import uprm.ece.icom4215.ar5.RISC_AR5;
@@ -48,7 +49,7 @@ public class InstructionSet {
 		else if(op.equals("ADDC rf")){
 			//Register Direct Addressing: need bits 8-10.
 			this.add(instruction.substring(5,8));
-			
+
 		}
 		else if(op.equals("SUB rf")){
 			//Register Direct Addressing: need bits 8-10.
@@ -73,38 +74,38 @@ public class InstructionSet {
 		else if(op.equals("RLC")){
 			//Implicit Addressing: don't care about bits in instruction.
 			//Need operand in accumulator (A)
-			//this.rlc();
+			this.rlc();
 
 		}
 		else if(op.equals("RRC")){
 			//Implicit Addressing: don't care about bits in instruction.
 			//Need operand in accumulator (A)
-			//this.rrc();
+			this.rrc();
 
 		}
 		else if(op.equals("LDA rf")){
 			//Register Direct Addressing: need bits 8-10.
-			//this.lda(instruction.substring(5,8));
+			this.lda(instruction.substring(5,8));
 
 		}
 		else if(op.equals("STA rf")){
 			//Register Direct Addressing: need bits 8-10.
-			//this.sta(instruction.substring(5,8));
+			this.sta(instruction.substring(5,8));
 
 		}
 		else if(op.equals("LDA addr")){
 			//Direct Addressing: need all bits after the opcode [ 0-10].
-			//this.ldaAddr(instruction.substring(5));
+			this.ldaAddr(instruction.substring(5));
 
 		}
 		else if(op.equals("STA addr")){
 			//Direct Addressing: need all bits after the opcode [ 0-10].
-			//this.staAddr(instruction.substring(5));
+			this.staAddr(instruction.substring(5));
 
 		}
 		else if(op.equals("LDI Immediate")){
 			//Immediate Addressing: need bits 0-7.
-			//this.ldi(instruction.substring(8));
+			this.ldi(instruction.substring(8));
 
 		}
 		else if(op.equals("BRZ")){
@@ -163,7 +164,7 @@ public class InstructionSet {
 		}
 		RISC_AR5.registers.setAcc(result.toString());
 	} 
-	
+
 	/**
 	 * Utilizes the 3 bit parameter to search for the 8-bit word associated with the
 	 * chosen register. Then compares each corresponding bit of the accumulator and 
@@ -184,9 +185,9 @@ public class InstructionSet {
 		}
 		RISC_AR5.registers.setAcc(result.toString());
 	} 
-	
-	
-	
+
+
+
 	/**
 	 * Utilizes the 3 bit parameter to fetch for the 8-bit word associated with the 
 	 * chosen register. Then, it adds this register to the accumulator and stores the 
@@ -206,7 +207,7 @@ public class InstructionSet {
 		for(int i=7; i>=0; i--){
 			accBit = Integer.parseInt(acc.charAt(i)+"");
 			registerBit = Integer.parseInt(register.charAt(i)+"");
-			
+
 			//System.out.println("Going to add bit "+(7-i)+ "[acc: "+accBit+", reg: "+registerBit+"]");
 
 			if(accBit+registerBit+carryBit==3){ 
@@ -228,8 +229,7 @@ public class InstructionSet {
 				carryBit=0;
 			}
 		}
-		
-		System.out.println("Result of Add Operation: "+result.toString());
+
 
 		//If carryBit is 1 then carryBit flag is true, otherwise carry flag is false.
 		RISC_AR5.registers.setCarryBit(carryBit==1);
@@ -260,7 +260,7 @@ public class InstructionSet {
 		}
 
 	}
-	
+
 	/**
 	 * Applies two's compliment to the value stored in the accumulator.
 	 * The result of this instruction is handed right back at the accumulator. Two's
@@ -268,11 +268,11 @@ public class InstructionSet {
 	 * significant '1' is detected. Example: "10101011" would result in "01010101".
 	 */
 	private void neg() {
-		
+
 		String acc = RISC_AR5.registers.getAcc();
 		StringBuilder result = new StringBuilder();
 		boolean foundFirstOne = false;
-		
+
 		for(int i=7; i>=0; i--){
 			if (!foundFirstOne){
 				if(acc.charAt(i)=='1'){
@@ -287,14 +287,14 @@ public class InstructionSet {
 					result.insert(0,"0");
 				else
 					result.insert(0,"1");
-				
+
 			}
 		}
-		
-		
+
+
 		RISC_AR5.registers.setAcc(result.toString());
 	}
-	 
+
 	/**
 	 * Complements each bit of the 8-bit word located in the accumulator.
 	 * Upon finishing, hands the result back to the accumulator.
@@ -302,7 +302,7 @@ public class InstructionSet {
 	private void not() {
 		String acc = RISC_AR5.registers.getAcc();
 		StringBuilder result = new StringBuilder(); 
-		
+
 		for(int i=0; i< 8; i++){
 			if(acc.charAt(i)=='0')
 				result.append("1");
@@ -311,5 +311,161 @@ public class InstructionSet {
 		}
 		RISC_AR5.registers.setAcc(result.toString());
 	}
+
+	/**
+	 * Retrieves the 8-bit word located in the accumulator, then shifts all bits
+	 * in a circular left motion by 1 bit. The result of this operation is handed back
+	 * to the accumulator.
+	 */
+	private void rlc(){
+		String acc = RISC_AR5.registers.getAcc();
+		StringBuilder result = new StringBuilder();
+		RISC_AR5.registers.clearSR();
+
+
+		for (int i=1; i<8;i++){
+			result.append(acc.charAt(i));
+		}
+		result.append(acc.charAt(0));
+
+		if(result.charAt(0)=='1')
+			RISC_AR5.registers.setNegativeBit(true);
+
+		if(Integer.parseInt(result.toString(),2)==0)
+			RISC_AR5.registers.setZeroBit(true);
+
+		RISC_AR5.registers.setAcc(result.toString());
+	}
+
+	/**
+	 * Retrieves the 8-bit word located in the accumulator, then shifts all bits
+	 * in a circular right motion by 1 bit. The result of this operation is handed back
+	 * to the accumulator.
+	 */
+	private void rrc(){
+		String acc = RISC_AR5.registers.getAcc();
+		StringBuilder result = new StringBuilder();
+		RISC_AR5.registers.clearSR();
+
+		result.append(acc.charAt(7));
+		for (int i=0; i<7;i++){
+			result.append(acc.charAt(i));
+		}
+
+
+		if(result.charAt(0)=='1')
+			RISC_AR5.registers.setNegativeBit(true);
+
+		if(Integer.parseInt(result.toString(),2)==0)
+			RISC_AR5.registers.setZeroBit(true);
+
+		RISC_AR5.registers.setAcc(result.toString());
+	}
+
+	/**
+	 * Loads the 8-bit word of the selected register into the accumulator.
+	 * @param rf
+	 */
+	private void lda(String rf){
+		RISC_AR5.registers.setAcc(rf);
+	}
+
+	/**
+	 * Stores the 8-bit word of the accumulator into the selected register.
+	 * @param rf
+	 */
+	private void sta(String rf){
+		RISC_AR5.registers.setRegister(rf, RISC_AR5.registers.getAcc());
+	}
+
+	/**
+	 * Fetches for the 8-bit word located at the direct address location specified
+	 * in the instruction. Note that subtracting the operation code and the general
+	 * purpose register bits, we have 8 remaining bits. The parameter of this method
+	 * is composed of the 3-bit notation for the registers and the 8-bit which are used
+	 * to specify the direct address. Therefore, we only really care for the bits in
+	 * position 3-10. Represent in decimal to get the memory value at that location and 
+	 * record the resulting value in the accumulator.
+	 * @param instruction
+	 */
+	private void ldaAddr(String instruction){
+		RISC_AR5.registers.setAcc(RISC_AR5.memory.getAddress(Integer.parseInt(instruction.substring(3),2)+""));
+	}
+
+	/**
+	 * Stores the 8-bit word of the accumulator directly into the memory location 
+	 * specified by the last 8-bits of the instruction parameter. The first 3 bits of
+	 * the parameter represent the general purpose register (not used by this method).
+	 * @param instruction
+	 */
+	private void staAddr(String instruction){
+		RISC_AR5.memory.setAddress(Integer.parseInt(instruction.substring(3))+"", RISC_AR5.registers.getAcc());
+	}
+
+	/**
+	 * This instruction is based on Immediate Addressing, therefore, the data
+	 * to be operated is contained in the last 8-bits of the original instruction.
+	 * Therefore this method directly inserts these bits into the accumulator.
+	 * @param instruction
+	 */
+	private void ldi(String instruction){
+		RISC_AR5.registers.setAcc(instruction);
+	}
+
+	/**
+	 * If the Zero bit of the status register is 1 then the next instruction 
+	 * to be executed will be that located in the general purpose register R7.
+	 */
+	public void brz() {
+		if(RISC_AR5.registers.getSR().charAt(0)=='1'){
+			RISC_AR5.registers.setPC(RISC_AR5.registers.getRegister("111"));
+		}
+	}
+	
+	/**
+	 * If the Carry bit of the status register is 1 then the next instruction 
+	 * to be executed will be that located in the general purpose register R7.
+	 */
+	public void brc() {
+		if(RISC_AR5.registers.getSR().charAt(1)=='1'){
+			RISC_AR5.registers.setPC(RISC_AR5.registers.getRegister("111"));
+		}
+	}
+	
+	/**
+	 * If the Negative bit of the status register is 1 then the next instruction 
+	 * to be executed will be that located in the general purpose register R7.
+	 */
+	public void brn() {
+		if(RISC_AR5.registers.getSR().charAt(2)=='1'){
+			RISC_AR5.registers.setPC(RISC_AR5.registers.getRegister("111"));
+		}
+	}
+	
+	/**
+	 * If the Overflow bit of the status register is 1 then the next instruction 
+	 * to be executed will be that located in the general purpose register R7.
+	 */
+	public void bro() {
+		if(RISC_AR5.registers.getSR().charAt(3)=='1'){
+			RISC_AR5.registers.setPC(RISC_AR5.registers.getRegister("111"));
+		}
+	}
+	
+	/**
+	 * Performs the stop instruction, declaring that no further instructions
+	 * follow. This is the end of the fetch-execute cycle.
+	 */
+	public void stop(){
+		RISC_AR5.registers.setPC("");
+		RISC_AR5.stop();
+	}
+
+
+	/**
+	 * No operation instruction.
+	 */
+	@SuppressWarnings("unused")
+	private void nop() {}
 
 }
