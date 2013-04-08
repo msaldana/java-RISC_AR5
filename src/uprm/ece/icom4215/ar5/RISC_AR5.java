@@ -23,6 +23,7 @@ public class RISC_AR5 {
 	
 	public static void main(String[] args){
 		RISC_AR5.init();
+		try{
 		registers.setRegister("000", "01010101");
 		registers.setAcc("10101010");
 		instructions.next("000110001111");
@@ -35,7 +36,7 @@ public class RISC_AR5 {
 		registers.printFlags();
 		
 		registers.setAcc("10101010");
-		registers.setRegister("000", "0101010101");
+		registers.setRegister("000", "01010101");
 		instructions.next("0000000000000000");
 		System.out.println("AND Op successful: "+"00000000".equals(registers.getAcc()));
 		
@@ -52,6 +53,11 @@ public class RISC_AR5 {
 		
 		instructions.next("0100010000000000");
 		System.out.println("RRC Op successful: "+ "10101010".equals(registers.getAcc()));
+		}
+		
+		catch(Exception e){
+			e.printStackTrace();
+		}
 		
 		
 		

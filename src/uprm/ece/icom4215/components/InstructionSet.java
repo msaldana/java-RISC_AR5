@@ -5,6 +5,9 @@ package uprm.ece.icom4215.components;
 import java.util.HashMap;
 
 import uprm.ece.icom4215.ar5.RISC_AR5;
+import uprm.ece.icom4215.exceptions.InvalidAddressException;
+import uprm.ece.icom4215.exceptions.InvalidAddressValueException;
+import uprm.ece.icom4215.exceptions.InvalidProgramCounterException;
 
 public class InstructionSet {
 
@@ -53,7 +56,7 @@ public class InstructionSet {
 		}
 		else if(op.equals("SUB rf")){
 			//Register Direct Addressing: need bits 8-10.
-			//this.sub(instruction.substring(5,8));
+			this.sub(instruction.substring(5,8));
 		}
 		else if(op.equals("MUL rf")){
 			//Register Direct Addressing: need bits 8-10.
@@ -94,13 +97,13 @@ public class InstructionSet {
 
 		}
 		else if(op.equals("LDA addr")){
-			//Direct Addressing: need all bits after the opcode [ 0-10].
-			this.ldaAddr(instruction.substring(5));
+			//Immediate Addressing: need all bits after the opcode [ 0-10].
+			this.ldaAddr(instruction.substring(8));
 
 		}
 		else if(op.equals("STA addr")){
-			//Direct Addressing: need all bits after the opcode [ 0-10].
-			this.staAddr(instruction.substring(5));
+			//Immediate Addressing: need bits 0-7.
+			this.staAddr(instruction.substring(8));
 
 		}
 		else if(op.equals("LDI Immediate")){
@@ -154,15 +157,27 @@ public class InstructionSet {
 	private void and(String rf) {
 		String acc, register;
 		acc = RISC_AR5.registers.getAcc();
-		register = RISC_AR5.registers.getRegister(rf);
-		StringBuilder result = new StringBuilder();
-		for(int i=0; i< acc.length(); i++){
-			if(register.charAt(i) == '1' && acc.charAt(i) == '1')
-				result.append("1");
-			else 
-				result.append("0");
+		try {
+			register = RISC_AR5.registers.getRegister(rf);
+			StringBuilder result = new StringBuilder();
+			for(int i=0; i< acc.length(); i++){
+				if(register.charAt(i) == '1' && acc.charAt(i) == '1')
+					result.append("1");
+				else 
+					result.append("0");
+			}
+			RISC_AR5.registers.setAcc(result.toString());
+		} 
+
+		catch (InvalidAddressException e) {
+			// rf must be a 3-bit string.
+			e.printStackTrace();
 		}
-		RISC_AR5.registers.setAcc(result.toString());
+		catch (InvalidAddressValueException e){
+			// the accumulator must be given an 8-bit string.
+			e.printStackTrace();
+		}
+
 	} 
 
 	/**
@@ -175,15 +190,26 @@ public class InstructionSet {
 	private void or(String rf) {
 		String acc, register;
 		acc = RISC_AR5.registers.getAcc();
-		register = RISC_AR5.registers.getRegister(rf);
-		StringBuilder result = new StringBuilder();
-		for(int i=0; i< acc.length(); i++){
-			if(register.charAt(i) == '0' && acc.charAt(i) == '0')
-				result.append("0");
-			else 
-				result.append("1");
+		try {
+			register = RISC_AR5.registers.getRegister(rf);
+			StringBuilder result = new StringBuilder();
+			for(int i=0; i< acc.length(); i++){
+				if(register.charAt(i) == '0' && acc.charAt(i) == '0')
+					result.append("0");
+				else 
+					result.append("1");
+			}
+			RISC_AR5.registers.setAcc(result.toString());
+		} 
+		catch (InvalidAddressException e) {
+			// rf must be a 3-bit string.
+			e.printStackTrace();
 		}
-		RISC_AR5.registers.setAcc(result.toString());
+		catch (InvalidAddressValueException e){
+			// the accumulator must be given an 8-bit string.
+			e.printStackTrace();
+		}
+
 	} 
 
 
@@ -195,71 +221,132 @@ public class InstructionSet {
 	 * @param rf
 	 */
 	private void add(String rf){
+		try {
+			addValue(RISC_AR5.registers.getRegister(rf));
+		} catch (InvalidAddressException e) {
+			// rf is not a 3-bit word
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Utilizes an 8-bit word to add to the value of the accumulator. The result of 
+	 * the operation is stored in the accumulator.
+	 * @param eightBitValue
+	 */
+	private void addValue(String eightBitValue){
 		RISC_AR5.registers.clearSR();
 		String acc = RISC_AR5.registers.getAcc();
-		String register = RISC_AR5.registers.getRegister(rf);
-		StringBuilder result = new StringBuilder();
-		int accBit, registerBit,carryBit;
-		carryBit =0;
-		//System.out.println("Passed acc: "+ acc);
-		//System.out.println("Passed reg: "+register);
+		try{
+			
+			StringBuilder result = new StringBuilder();
+			int accBit, registerBit,carryBit;
+			carryBit =0;
 
-		for(int i=7; i>=0; i--){
-			accBit = Integer.parseInt(acc.charAt(i)+"");
-			registerBit = Integer.parseInt(register.charAt(i)+"");
+			for(int i=7; i>=0; i--){
+				accBit = Integer.parseInt(acc.charAt(i)+"");
+				registerBit = Integer.parseInt(eightBitValue.charAt(i)+"");
 
-			//System.out.println("Going to add bit "+(7-i)+ "[acc: "+accBit+", reg: "+registerBit+"]");
 
-			if(accBit+registerBit+carryBit==3){ 
-				result.insert(0, "1");
-				carryBit = 1;
+				if(accBit+registerBit+carryBit==3){ 
+					result.insert(0, "1");
+					carryBit = 1;
+				}
+
+				else if(accBit+registerBit+carryBit==2){
+					result.insert(0, "0");
+					carryBit = 1;
+				}
+				else if(accBit+registerBit+carryBit==1){
+					result.insert(0,"1");
+					carryBit = 0;
+				}
+
+				else{
+					result.insert(0, "0");
+					carryBit=0;
+				}
 			}
 
-			else if(accBit+registerBit+carryBit==2){
-				result.insert(0, "0");
-				carryBit = 1;
+
+			//If carryBit is 1 then carryBit flag is true, otherwise carry flag is false.
+			RISC_AR5.registers.setCarryBit(carryBit==1);
+
+			//In order to verify if an overflow condition has happened the following conditions
+			//must be met: most significant bit in the accumulator must be equal to the most 
+			//significant bit in the register, and the selected accumulator's bit must be different
+			//from the results most significant bit.
+			accBit = Integer.parseInt(acc.substring(0));
+			registerBit = Integer.parseInt(eightBitValue.substring(0));
+
+			if(accBit == registerBit && Integer.parseInt(result.charAt(0)+"")!=accBit){
+				RISC_AR5.registers.setOverflowBit(true);
 			}
-			else if(accBit+registerBit+carryBit==1){
-				result.insert(0,"1");
-				carryBit = 0;
+
+			//If the result is zero, set the zero flag
+			if (Integer.parseInt(result.toString(),2)==0){
+				RISC_AR5.registers.setZeroBit(true);
 			}
 
-			else{
-				result.insert(0, "0");
-				carryBit=0;
+			//If the most significant bit is 1, negative flag true.
+			if(result.charAt(0) =='1'){
+				RISC_AR5.registers.setNegativeBit(true);
+			}
+
+			if(result.length()==8){
+				RISC_AR5.registers.setAcc(result.toString());
 			}
 		}
-
-
-		//If carryBit is 1 then carryBit flag is true, otherwise carry flag is false.
-		RISC_AR5.registers.setCarryBit(carryBit==1);
-
-		//In order to verify if an overflow condition has happened the following conditions
-		//must be met: most significant bit in the accumulator must be equal to the most 
-		//significant bit in the register, and the selected accumulator's bit must be different
-		//from the results most significant bit.
-		accBit = Integer.parseInt(acc.substring(0));
-		registerBit = Integer.parseInt(register.substring(0));
-
-		if(accBit == registerBit && Integer.parseInt(result.charAt(0)+"")!=accBit){
-			RISC_AR5.registers.setOverflowBit(true);
+		catch (InvalidAddressValueException e){
+			// the accumulator must be given an 8-bit string.
+			e.printStackTrace();
 		}
-
-		//If the result is zero, set the zero flag
-		if (Integer.parseInt(result.toString(),2)==0){
-			RISC_AR5.registers.setZeroBit(true);
-		}
-
-		//If the most significant bit is 1, negative flag true.
-		if(result.charAt(0) =='1'){
-			RISC_AR5.registers.setNegativeBit(true);
-		}
-
-		if(result.length()==8){
-			RISC_AR5.registers.setAcc(result.toString());
-		}
-
 	}
+	
+	
+	
+	/**
+	 * Utilizes the 3 bit parameter to fetch for the 8-bit word associated with the 
+	 * chosen register. Then, it subtracts this register to the accumulator and stores the 
+	 * result in the accumulator.
+	 * 
+	 * 
+	 * @param rf
+	 */
+	private void sub(String rf){
+		//First apply 2's compliment to rf, then add it to 
+		//the accumulator.
+			try {
+				String register = RISC_AR5.registers.getRegister(rf);
+				StringBuilder result = new StringBuilder();
+				boolean foundFirstOne = false;
+
+				for(int i=7; i>=0; i--){
+					if (!foundFirstOne){
+						if(register.charAt(i)=='1'){
+							foundFirstOne=true;
+							result.insert(0,"1");
+						}
+						else
+							result.insert(0, "0");
+					}
+					else{
+						if(register.charAt(i)=='1')
+							result.insert(0,"0");
+						else
+							result.insert(0,"1");
+
+					}
+				}
+				addValue(result.toString());
+			} catch (InvalidAddressException e) {
+				// rf is not a 3-bit word
+				e.printStackTrace();
+			}
+				
+	}
+	
+	
 
 	/**
 	 * Applies two's compliment to the value stored in the accumulator.
@@ -291,8 +378,13 @@ public class InstructionSet {
 			}
 		}
 
-
-		RISC_AR5.registers.setAcc(result.toString());
+		try {
+			RISC_AR5.registers.setAcc(result.toString());
+		} 
+		catch (InvalidAddressValueException e) {
+			// the accumulator must be given an 8-bit word
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -309,7 +401,12 @@ public class InstructionSet {
 			else 
 				result.append("0");
 		}
-		RISC_AR5.registers.setAcc(result.toString());
+		try {
+			RISC_AR5.registers.setAcc(result.toString());
+		} catch (InvalidAddressValueException e) {
+			// the accumulator must be given an 8-bit word
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -334,7 +431,12 @@ public class InstructionSet {
 		if(Integer.parseInt(result.toString(),2)==0)
 			RISC_AR5.registers.setZeroBit(true);
 
-		RISC_AR5.registers.setAcc(result.toString());
+		try {
+			RISC_AR5.registers.setAcc(result.toString());
+		} catch (InvalidAddressValueException e) {
+			// the accumulator must be given an 8-bit word
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -359,7 +461,12 @@ public class InstructionSet {
 		if(Integer.parseInt(result.toString(),2)==0)
 			RISC_AR5.registers.setZeroBit(true);
 
-		RISC_AR5.registers.setAcc(result.toString());
+		try {
+			RISC_AR5.registers.setAcc(result.toString());
+		} catch (InvalidAddressValueException e) {
+			// the accumulator must be given an 8-bit word
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -367,7 +474,15 @@ public class InstructionSet {
 	 * @param rf
 	 */
 	private void lda(String rf){
-		RISC_AR5.registers.setAcc(rf);
+		try {
+			RISC_AR5.registers.setAcc(RISC_AR5.registers.getRegister(rf));
+		} catch (InvalidAddressValueException e) {
+			// the accumulator must be passed an 8-bit word
+			e.printStackTrace();
+		} catch (InvalidAddressException e) {
+			// rf must be a 3-bit word
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -375,7 +490,15 @@ public class InstructionSet {
 	 * @param rf
 	 */
 	private void sta(String rf){
-		RISC_AR5.registers.setRegister(rf, RISC_AR5.registers.getAcc());
+		try {
+			RISC_AR5.registers.setRegister(rf, RISC_AR5.registers.getAcc());
+		} catch (InvalidAddressException e) {
+			// rf must be a 3-bit word
+			e.printStackTrace();
+		} catch (InvalidAddressValueException e) {
+			// the register must be given an 8-bit word
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -389,7 +512,21 @@ public class InstructionSet {
 	 * @param instruction
 	 */
 	private void ldaAddr(String instruction){
-		RISC_AR5.registers.setAcc(RISC_AR5.memory.getAddress(Integer.parseInt(instruction.substring(3),2)+""));
+		try {
+			RISC_AR5.registers.setAcc(RISC_AR5.memory.getAddress(Integer.parseInt(instruction,2)+""));
+		} catch (NumberFormatException e) {
+			//The parsing of the instruction should convert an 8-bit word into a decimal 
+			//number in the range of 0-255. If the string is not binary, it will not parse
+			//correctly.
+			e.printStackTrace();
+		} catch (InvalidAddressException e) {
+			//The address given to the memory component is not defined. Usage: decimal number in
+			//the range 0-255.
+			e.printStackTrace();
+		} catch (InvalidAddressValueException e) {
+			// Must give the accumulator an 8-bit word.
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -399,7 +536,21 @@ public class InstructionSet {
 	 * @param instruction
 	 */
 	private void staAddr(String instruction){
-		RISC_AR5.memory.setAddress(Integer.parseInt(instruction.substring(3))+"", RISC_AR5.registers.getAcc());
+		try {
+			RISC_AR5.memory.setAddress(Integer.parseInt(instruction,2)+"", RISC_AR5.registers.getAcc());
+		} catch (NumberFormatException e) {
+			//The parsing of the instruction should convert an 8-bit word into a decimal 
+			//number in the range of 0-255. If the string is not binary, it will not parse
+			//correctly.
+			e.printStackTrace();
+		} catch (InvalidAddressValueException e) {
+			//The data trying to be stored into the given memory location is not an 8-bit word.
+			e.printStackTrace();
+		} catch (InvalidAddressException e) {
+			//The address given to the memory component is not defined. Usage: decimal number in
+			//the range 0-255.
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -409,7 +560,12 @@ public class InstructionSet {
 	 * @param instruction
 	 */
 	private void ldi(String instruction){
-		RISC_AR5.registers.setAcc(instruction);
+		try {
+			RISC_AR5.registers.setAcc(instruction);
+		} catch (InvalidAddressValueException e) {
+			// instruction is not an 8-bit word
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -418,46 +574,84 @@ public class InstructionSet {
 	 */
 	public void brz() {
 		if(RISC_AR5.registers.getSR().charAt(0)=='1'){
-			RISC_AR5.registers.setPC(RISC_AR5.registers.getRegister("111"));
+			try {
+				RISC_AR5.registers.setPC(RISC_AR5.registers.getRegister("111"));
+			} catch (InvalidProgramCounterException e) {
+				// The program counter is tried to be set into a location that is not
+				// valid. Valid locations are non empty even memory addresses in the 
+				// range of 0-254.
+				e.printStackTrace();
+			} catch (InvalidAddressException e) {
+				// The setPC function did not receive an 8-bit word.
+				e.printStackTrace();
+			}
 		}
 	}
-	
+
 	/**
 	 * If the Carry bit of the status register is 1 then the next instruction 
 	 * to be executed will be that located in the general purpose register R7.
 	 */
 	public void brc() {
 		if(RISC_AR5.registers.getSR().charAt(1)=='1'){
-			RISC_AR5.registers.setPC(RISC_AR5.registers.getRegister("111"));
+			try {
+				RISC_AR5.registers.setPC(RISC_AR5.registers.getRegister("111"));
+			} catch (InvalidProgramCounterException e) {
+				// The program counter is tried to be set into a location that is not
+				// valid. Valid locations are non empty even memory addresses in the 
+				// range of 0-254.
+				e.printStackTrace();
+			} catch (InvalidAddressException e) {
+				// The setPC function did not receive an 8-bit word.
+				e.printStackTrace();
+			}
 		}
 	}
-	
+
 	/**
 	 * If the Negative bit of the status register is 1 then the next instruction 
 	 * to be executed will be that located in the general purpose register R7.
 	 */
 	public void brn() {
 		if(RISC_AR5.registers.getSR().charAt(2)=='1'){
-			RISC_AR5.registers.setPC(RISC_AR5.registers.getRegister("111"));
+			try {
+				RISC_AR5.registers.setPC(RISC_AR5.registers.getRegister("111"));
+			} catch (InvalidProgramCounterException e) {
+				// The program counter is tried to be set into a location that is not
+				// valid. Valid locations are non empty even memory addresses in the 
+				// range of 0-254.
+				e.printStackTrace();
+			} catch (InvalidAddressException e) {
+				// The setPC function did not receive an 8-bit word.
+				e.printStackTrace();
+			}
 		}
 	}
-	
+
 	/**
 	 * If the Overflow bit of the status register is 1 then the next instruction 
 	 * to be executed will be that located in the general purpose register R7.
 	 */
 	public void bro() {
 		if(RISC_AR5.registers.getSR().charAt(3)=='1'){
-			RISC_AR5.registers.setPC(RISC_AR5.registers.getRegister("111"));
+			try {
+				RISC_AR5.registers.setPC(RISC_AR5.registers.getRegister("111"));
+			} catch (InvalidProgramCounterException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvalidAddressException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
-	
+
 	/**
 	 * Performs the stop instruction, declaring that no further instructions
 	 * follow. This is the end of the fetch-execute cycle.
 	 */
 	public void stop(){
-		RISC_AR5.registers.setPC("");
+		
 		RISC_AR5.stop();
 	}
 
