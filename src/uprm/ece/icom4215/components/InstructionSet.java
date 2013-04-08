@@ -8,11 +8,24 @@ import uprm.ece.icom4215.ar5.RISC_AR5;
 import uprm.ece.icom4215.exceptions.InvalidAddressException;
 import uprm.ece.icom4215.exceptions.InvalidAddressValueException;
 import uprm.ece.icom4215.exceptions.InvalidProgramCounterException;
+import uprm.ece.icom4215.exceptions.UnsupportedInstructionException;
 
+/**
+ * Represents the instruction set of the RISC AR5 architecture. 
+ * Usage: Main constructor initializes all instructions. 
+ * This class is designed to execute 16-bit word instructions through
+ * the next(instruction) method. If the instruction is found on the
+ * set or is not a 16-bit word, an exception will occur.
+ *
+ */
 public class InstructionSet {
 
 	HashMap<String, String> set = new HashMap<String, String>();
 
+	/*
+	 *Basic Constructor - initializes the instruction set for 
+	 *the RISC AR5 architecture. 
+	 */
 	public InstructionSet(){
 		set.put("00000", "AND rf");
 		set.put("00001", "OR rf");
@@ -37,7 +50,12 @@ public class InstructionSet {
 
 	}
 
+	/**
+	 * Execute the given instruction. Instructions must be a 16-bit word.
+	 * @param instruction
+	 */
 	public void next(String instruction){
+		if (instruction.matches("[0-1]{16}")){
 		String op = set.get(instruction.substring(0, 5));
 
 		if (op.equals("AND rf")){
@@ -144,6 +162,13 @@ public class InstructionSet {
 
 		else{
 			//Error Exception RISC AR5 Unsupported Instruction
+			new UnsupportedInstructionException("The instruction - "+instruction+ " - is not" +
+					"supported by the RISC AR5 architecture.");
+		}
+		}
+		else{
+			new InvalidAddressValueException("An instruction in the RISC_AR5 must be" +
+					"a 16-bit word. The word - "+instruction+ " - is not valid.");
 		}
 	}
 
