@@ -9,6 +9,7 @@ import uprm.ece.icom4215.exceptions.InvalidAddressException;
 import uprm.ece.icom4215.exceptions.InvalidAddressValueException;
 import uprm.ece.icom4215.exceptions.InvalidProgramCounterException;
 import uprm.ece.icom4215.exceptions.UnsupportedInstructionException;
+import uprm.ece.icom4215.util.NotationConversion;
 
 /**
  * Represents the instruction set of the RISC AR5 architecture. 
@@ -194,7 +195,7 @@ public class InstructionSet {
 					result.append("0");
 			}
 			RISC_AR5.registers.setAcc(result.toString());
-			
+
 			//Carry, negative, and overflow are not used. Only
 			//interest here is the zero flag.
 			RISC_AR5.registers.clearSR();
@@ -233,7 +234,7 @@ public class InstructionSet {
 					result.append("1");
 			}
 			RISC_AR5.registers.setAcc(result.toString());
-			
+
 			//Carry, negative, and overflow are not used. Only
 			//interest here is the zero flag.
 			RISC_AR5.registers.clearSR();
@@ -274,7 +275,7 @@ public class InstructionSet {
 	 * @param bitValue
 	 */
 	private void addValue(String bitValue){
-		
+
 		String acc = RISC_AR5.registers.getAcc();
 		try{
 
@@ -309,7 +310,7 @@ public class InstructionSet {
 
 			//Reset status register for new operations.
 			RISC_AR5.registers.clearSR();
-			
+
 			//If carryBit is 1 then carryBit flag is true, otherwise carry flag is false.
 			RISC_AR5.registers.setCarryBit(carryBit==1);
 
@@ -393,9 +394,9 @@ public class InstructionSet {
 	 * with zeros. This method is a fail proof method to present the correct representation 
 	 * of the multiplication. 
 	 * @param rf
-	 */
+	 *
 	private void mul(String rf){
-		
+
 		String acc, reg;
 		int decResult;
 		StringBuilder result = new StringBuilder();
@@ -421,10 +422,10 @@ public class InstructionSet {
 				}
 			}
 			decResult = Integer.parseInt(acc,2)*Integer.parseInt(reg,2);
-			
+
 			//Bring result of operation back to Binary
 			result.append(Integer.toBinaryString(decResult));
-			
+
 			//Sign extend the result to 8 bits if necessary.
 			while(result.length()<8){
 				if(result.charAt(0)=='1'){
@@ -438,10 +439,10 @@ public class InstructionSet {
 			while(result.length()>8){
 				result.delete(0, 0);
 			}
-			 
+
 			if(result.length()==8){
 				RISC_AR5.registers.setAcc(result.toString());
-				
+
 				//No carry or overflow will result using this method. It multiplies following
 				//the rules of two's compliment multiplication, and therefore only presents
 				//values on the range of 49 to -56. This corresponds to the maximum positive 
@@ -452,7 +453,7 @@ public class InstructionSet {
 				if (Integer.parseInt(result.toString(),2)==0){
 					RISC_AR5.registers.setZeroBit(true);
 				}
-				
+
 
 				//If the most significant bit is 1, negative flag true.
 				if(result.charAt(0) =='1'){
@@ -466,10 +467,68 @@ public class InstructionSet {
 		} catch (InvalidAddressValueException e) {
 			// length being stored into the register is not 8 bits.
 			e.printStackTrace();
-		}
+		}	
+	} */
+
+	/**
+	 * Unsigned multiplier of 4 by 4 bit words. Result is always an 8 bit word
+	 * handed back to the accumulator. This based on bitwise multiplication 
+	 * parsed to decimal values and represented finally as binary.
+	 * @param rf
+	 */
+	private void mul(String rf){
+
+		String acc, reg, result;
+		int decResult;
 		
+		//Multiplier only uses the last 4 bits of the accumulator.
+		acc = RISC_AR5.registers.getAcc().substring(4);
 		
+		try {
+			//Multiplier only uses the last 4 bits of the register.
+			reg = RISC_AR5.registers.getRegister(rf).substring(4);
+			
+			decResult = Integer.parseInt(acc,2)*Integer.parseInt(reg,2);
+
+			//Bring result of operation back to Binary. Extends the word to 
+			//8 bits if result needs it.
+			result = Integer.toBinaryString(decResult);
+			while (result.length()<8){
+				result="0"+result;
+			}
+
+			if(result.length()==8){
+				RISC_AR5.registers.setAcc(result.toString());
+
+				//Multiplying 4 bit words by 4 bit words, results at a maximum of an 8 bit 
+				//word. Thus, no carry bit is ever true. Also, since the multiplier is not 
+				//based on two's compliment, but rather on unsigned numbers; then there is
+				//no overflow.
+				RISC_AR5.registers.clearSR();
+
+				//If the result is zero, set the zero flag
+				if (Integer.parseInt(result.toString(),2)==0){
+					RISC_AR5.registers.setZeroBit(true);
+				}
+
+				//If the most significant bit is 1, negative flag true.
+				if(result.charAt(0) =='1'){
+					RISC_AR5.registers.setNegativeBit(true);
+				}
+				
+			}
+		} 
+		catch (InvalidAddressException e) {
+			// rf is not a 3-bit word
+			e.printStackTrace();
+		} catch (InvalidAddressValueException e) {
+			// length being stored into the register is not 8 bits.
+			e.printStackTrace();
+		}	
 	}
+
+
+
 
 	/**
 	 * Applies two's compliment to the value stored in the accumulator.
@@ -503,12 +562,12 @@ public class InstructionSet {
 
 		try {
 			RISC_AR5.registers.setAcc(result.toString());
-			
+
 			//This operation does not affect the overflow or carry. 
 			//Since it is two's compliment, we set the negative flag.
 			RISC_AR5.registers.clearSR();
 			RISC_AR5.registers.setNegativeBit(result.toString().charAt(0)=='1');
-			
+
 			//Set zero flag
 			RISC_AR5.registers.setZeroBit(Integer.parseInt(result.toString(),2)==0);
 		} 
@@ -534,16 +593,16 @@ public class InstructionSet {
 		}
 		try {
 			RISC_AR5.registers.setAcc(result.toString());
-			
+
 			//This operation does not affect the overflow or carry. 
 			//Since it is two's compliment, we set the negative flag.
 			RISC_AR5.registers.clearSR();
 			RISC_AR5.registers.setNegativeBit(result.toString().charAt(0)=='1');
-			
+
 			//Set zero flag
 			RISC_AR5.registers.setZeroBit(Integer.parseInt(result.toString(),2)==0);
 		} 
-		
+
 		catch (InvalidAddressValueException e) {
 			// the accumulator must be given an 8-bit word
 			e.printStackTrace();
@@ -559,13 +618,13 @@ public class InstructionSet {
 	private void rlc(){
 		String acc = RISC_AR5.registers.getAcc();
 		StringBuilder result = new StringBuilder();
-		
+
 		for (int i=1; i<8;i++){
 			result.append(acc.charAt(i));
 		}
 		result.append(RISC_AR5.registers.getCarryFlag());
 
-		
+
 		try {
 			RISC_AR5.registers.setAcc(result.toString());
 			RISC_AR5.registers.clearSR();
@@ -619,8 +678,8 @@ public class InstructionSet {
 			//The carry flag will contain the bit that was shifted out of the 
 			//8-bit word.
 			RISC_AR5.registers.setCarryBit(acc.charAt(7)=='1');
-			
-			
+
+
 		} catch (InvalidAddressValueException e) {
 			// the accumulator must be given an 8-bit word
 			e.printStackTrace();
@@ -634,7 +693,7 @@ public class InstructionSet {
 	private void lda(String rf){
 		try {
 			RISC_AR5.registers.setAcc(RISC_AR5.registers.getRegister(rf));
-			
+
 			//For this operation, there is no carry or overflow;
 			RISC_AR5.registers.clearSR();
 			//Set Negative flag.

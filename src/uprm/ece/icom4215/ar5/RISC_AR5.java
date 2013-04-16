@@ -61,7 +61,13 @@ public class RISC_AR5 {
 		registers.setPC("00000010");
 		System.out.println(registers.getPC());
 		
-		System.out.println(Integer.toHexString((int)'/'));
+		registers.setAcc("00001010");
+		registers.setRegister("000", "00000110");
+		instructions.next("0010100000000000");
+		System.out.println("MUL Op successful: "+ "00111100".equals(registers.getAcc()));
+		registers.printFlags();
+		
+		
 
 		}
 		
