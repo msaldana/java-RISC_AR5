@@ -313,7 +313,7 @@ public class Registers {
 	 * for it will fall out of bounds.
 	 * @throws ProgramCounterOutOfBoundsException
 	 */
-	public void incrementPC(){
+	public void incrementPC() throws InvalidProgramCounterException{
 		int currentPC = Integer.parseInt(getPC(),2);
 		if (currentPC<254){
 			registers.put("PC", NotationConversion.decimalTo8BitBinary(currentPC+2));

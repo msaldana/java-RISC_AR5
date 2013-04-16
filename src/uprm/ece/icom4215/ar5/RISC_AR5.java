@@ -4,6 +4,7 @@ import uprm.ece.icom4215.components.InstructionSet;
 import uprm.ece.icom4215.components.Memory;
 import uprm.ece.icom4215.components.Registers;
 import uprm.ece.icom4215.exceptions.InvalidAddressValueException;
+import uprm.ece.icom4215.exceptions.InvalidProgramCounterException;
 import uprm.ece.icom4215.exceptions.UnsupportedInstructionException;
 
 /**
@@ -17,7 +18,7 @@ public class RISC_AR5 {
 	public static Registers registers;
 	public static InstructionSet instructions;
 	private static boolean stop;
-	
+
 	/**
 	 * Statically initialize the microprocessor so that
 	 * it can be used freely by all components.
@@ -28,7 +29,7 @@ public class RISC_AR5 {
 		instructions = new InstructionSet();
 		stop = false;
 	}
-	
+
 	/**
 	 * Sets the stop condition to true, indicating that
 	 * the main program has finished all instructions.
@@ -36,7 +37,7 @@ public class RISC_AR5 {
 	public static void stop(){
 		stop = true;
 	}
-	
+
 	/**
 	 * Returns a status detailing whether the main
 	 * program is stopped or still running.
@@ -45,7 +46,7 @@ public class RISC_AR5 {
 	public static boolean isStopped(){
 		return stop;
 	}
-	
+
 	/**
 	 * Executes the next instruction according to the program
 	 * counter.
@@ -58,9 +59,15 @@ public class RISC_AR5 {
 			instructions.next(IR);
 			//Don't increment if branch.
 			if(!opcode.equals("10000")&&!opcode.equals("10001")&&!opcode.equals("10010")
-					&&!opcode.equals("10011"))
-			registers.incrementPC();
-			
+					&&!opcode.equals("10011")){
+				try {
+					registers.incrementPC();
+				} catch (InvalidProgramCounterException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
 		} catch (InvalidAddressValueException e) {
 			// Instruction is not a 16 bit word.
 			e.printStackTrace();
@@ -69,5 +76,5 @@ public class RISC_AR5 {
 			e.printStackTrace();
 		}
 	}
-	
+
 }

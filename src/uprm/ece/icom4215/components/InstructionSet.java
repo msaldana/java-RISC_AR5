@@ -195,11 +195,11 @@ public class InstructionSet {
 			}
 			RISC_AR5.registers.setAcc(result.toString());
 
-			//Carry, negative, and overflow are not used. Only
-			//interest here is the zero flag.
-			RISC_AR5.registers.clearSR();
+			//Carry and overflow are unchanged. Only
+			//interest here is the zero flag and negative.
 			if(Integer.parseInt(result.toString(),2)==0)
 				RISC_AR5.registers.setZeroBit(true);
+				RISC_AR5.registers.setNegativeBit(result.charAt(0)=='1');
 		} 
 
 		catch (InvalidAddressException e) {
@@ -234,11 +234,12 @@ public class InstructionSet {
 			}
 			RISC_AR5.registers.setAcc(result.toString());
 
-			//Carry, negative, and overflow are not used. Only
-			//interest here is the zero flag.
+			//Carry and overflow are not used. Only interest
+			//here is the zero and negative flags.
 			RISC_AR5.registers.clearSR();
 			if(Integer.parseInt(result.toString(),2)==0)
 				RISC_AR5.registers.setZeroBit(true);
+			RISC_AR5.registers.setNegativeBit(result.charAt(0)=='1');
 		} 
 		catch (InvalidAddressException e) {
 			// rf must be a 3-bit string.
@@ -250,7 +251,6 @@ public class InstructionSet {
 		}
 
 	} 
-
 
 
 	/**
@@ -500,11 +500,18 @@ public class InstructionSet {
 				RISC_AR5.registers.setAcc(result.toString());
 
 				//Multiplying 4 bit words by 4 bit words, results at a maximum of an 8 bit 
-				//word. Thus, no carry bit is ever true. Also, since the multiplier is not 
-				//based on two's compliment, but rather on unsigned numbers; then there is
-				//no overflow.
+				//word. Thus, no carry bit is ever true. 
 				RISC_AR5.registers.clearSR();
 
+				//Overflow will occur when the result's most significant bit is a 1 and both 
+				//operands have equal most significant bits; and when the operands have different
+				//signed bits in the most significant position, but the result has a 0 in the 
+				//most significant bit.
+				if(acc.charAt(0)==reg.charAt(0) && result.charAt(0)=='1')
+					RISC_AR5.registers.setOverflowBit(true);
+				if(acc.charAt(0)!=reg.charAt(0) && result.charAt(0)=='0')
+					RISC_AR5.registers.setOverflowBit(true);
+				
 				//If the result is zero, set the zero flag
 				if (Integer.parseInt(result.toString(),2)==0){
 					RISC_AR5.registers.setZeroBit(true);
@@ -514,6 +521,7 @@ public class InstructionSet {
 				if(result.charAt(0) =='1'){
 					RISC_AR5.registers.setNegativeBit(true);
 				}
+				
 				
 			}
 		} 
@@ -564,7 +572,6 @@ public class InstructionSet {
 
 			//This operation does not affect the overflow or carry. 
 			//Since it is two's compliment, we set the negative flag.
-			RISC_AR5.registers.clearSR();
 			RISC_AR5.registers.setNegativeBit(result.toString().charAt(0)=='1');
 
 			//Set zero flag
@@ -595,7 +602,6 @@ public class InstructionSet {
 
 			//This operation does not affect the overflow or carry. 
 			//Since it is two's compliment, we set the negative flag.
-			RISC_AR5.registers.clearSR();
 			RISC_AR5.registers.setNegativeBit(result.toString().charAt(0)=='1');
 
 			//Set zero flag
@@ -626,10 +632,9 @@ public class InstructionSet {
 
 		try {
 			RISC_AR5.registers.setAcc(result.toString());
-			RISC_AR5.registers.clearSR();
-			//For this operation, there is no overflow. We consider the operation 
-			//to be an arithmetic value in two's compliment, thus we will
-			//set the negative flag.
+			//For this operation, overflow is unchanged.
+			//We consider the operation to be an arithmetic value in two's compliment,
+			//thus we will set the negative flag.
 			if(result.charAt(0)=='1')
 				RISC_AR5.registers.setNegativeBit(true);
 
@@ -664,8 +669,7 @@ public class InstructionSet {
 
 		try {
 			RISC_AR5.registers.setAcc(result.toString());
-			RISC_AR5.registers.clearSR();
-			//For this operation, there is no overflow. We consider the operation 
+			//For this operation, the overflow is unchanged. We consider the operation 
 			//to be an arithmetic value in two's compliment, thus we will
 			//set the negative flag.
 			if(result.charAt(0)=='1')
@@ -693,8 +697,7 @@ public class InstructionSet {
 		try {
 			RISC_AR5.registers.setAcc(RISC_AR5.registers.getRegister(rf));
 
-			//For this operation, there is no carry or overflow;
-			RISC_AR5.registers.clearSR();
+			//For this operation, the carry and overflow bits are unchanged;
 			//Set Negative flag.
 			RISC_AR5.registers.setNegativeBit(RISC_AR5.registers.getAcc().charAt(0)=='1');
 			//Set Zero flag.
@@ -715,8 +718,7 @@ public class InstructionSet {
 	private void sta(String rf){
 		try {
 			RISC_AR5.registers.setRegister(rf, RISC_AR5.registers.getAcc());
-			//No operation on accumulator. Reset status register.
-			RISC_AR5.registers.clearSR();
+			//No operation on accumulator. 
 		} catch (InvalidAddressException e) {
 			// rf must be a 3-bit word
 			e.printStackTrace();
@@ -739,8 +741,7 @@ public class InstructionSet {
 	private void ldaAddr(String instruction){
 		try {
 			RISC_AR5.registers.setAcc(RISC_AR5.memory.getAddress(Integer.parseInt(instruction,2)+""));
-			//For this operation, there is no carry or overflow;
-			RISC_AR5.registers.clearSR();
+			//For this operation, carry and overflow are unchanged;
 			//Set Negative flag.
 			RISC_AR5.registers.setNegativeBit(RISC_AR5.registers.getAcc().charAt(0)=='1');
 			//Set Zero flag.
@@ -769,8 +770,7 @@ public class InstructionSet {
 	private void staAddr(String instruction){
 		try {
 			RISC_AR5.memory.setAddress(Integer.parseInt(instruction,2)+"", RISC_AR5.registers.getAcc());
-			//No operation on accumulator. Reset status register.
-			RISC_AR5.registers.clearSR();
+			//No operation on accumulator. 
 		} catch (NumberFormatException e) {
 			//The parsing of the instruction should convert an 8-bit word into a decimal 
 			//number in the range of 0-255. If the string is not binary, it will not parse
@@ -795,8 +795,7 @@ public class InstructionSet {
 	private void ldi(String instruction){
 		try {
 			RISC_AR5.registers.setAcc(instruction);
-			//For this operation, there is no carry or overflow;
-			RISC_AR5.registers.clearSR();
+			//For this operation, carry and overflow are unchanged.
 			//Set Negative flag.
 			RISC_AR5.registers.setNegativeBit(instruction.charAt(0)=='1');
 			//Set Zero flag.

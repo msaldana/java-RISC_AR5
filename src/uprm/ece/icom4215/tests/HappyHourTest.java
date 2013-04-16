@@ -62,7 +62,7 @@ public class HappyHourTest {
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='0');
 		assertTrue(RISC_AR5.registers.getCarryFlag()=='0');
 		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
-		assertTrue(RISC_AR5.registers.getNegativeFlag()=='0');
+		assertTrue(RISC_AR5.registers.getNegativeFlag()=='1');
 		
 		RISC_AR5.step();
 		assertTrue(RISC_AR5.registers.getAcc().equals("00101000"));
@@ -74,33 +74,33 @@ public class HappyHourTest {
 		RISC_AR5.step();
 		assertTrue(RISC_AR5.registers.getRegister("111").equals("00101000"));
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='0');
-		assertTrue(RISC_AR5.registers.getCarryFlag()=='0');
+		assertTrue(RISC_AR5.registers.getCarryFlag()=='1');
 		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
 		assertTrue(RISC_AR5.registers.getNegativeFlag()=='0');
 		
 		RISC_AR5.step();
 		assertTrue(RISC_AR5.registers.getAcc().equals("00000010"));
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='0');
-		assertTrue(RISC_AR5.registers.getCarryFlag()=='0');
+		assertTrue(RISC_AR5.registers.getCarryFlag()=='1');
 		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
 		assertTrue(RISC_AR5.registers.getNegativeFlag()=='0');
 		
 		RISC_AR5.step();
 		assertTrue(RISC_AR5.registers.getRegister("011").equals("00000010"));
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='0');
-		assertTrue(RISC_AR5.registers.getCarryFlag()=='0');
+		assertTrue(RISC_AR5.registers.getCarryFlag()=='1');
 		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
 		assertTrue(RISC_AR5.registers.getNegativeFlag()=='0');
 		
 		RISC_AR5.step();
 		assertTrue(RISC_AR5.memory.getAddress("128").equals("00000010"));
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='0');
-		assertTrue(RISC_AR5.registers.getCarryFlag()=='0');
+		assertTrue(RISC_AR5.registers.getCarryFlag()=='1');
 		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
 		assertTrue(RISC_AR5.registers.getNegativeFlag()=='0');
 		
 		RISC_AR5.step();
-		assertTrue(RISC_AR5.registers.getAcc().equals("00000100"));
+		assertTrue(RISC_AR5.registers.getAcc().equals("00000101"));
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='0');
 		assertTrue(RISC_AR5.registers.getCarryFlag()=='0');
 		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
@@ -114,26 +114,25 @@ public class HappyHourTest {
 		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
 		assertTrue(RISC_AR5.registers.getNegativeFlag()=='0');
 		
-		//Why set carry to 1?
 		RISC_AR5.step();
-		assertTrue(RISC_AR5.registers.getAcc().equals("11111010"));
+		assertTrue(RISC_AR5.registers.getAcc().equals("11111011"));
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='0');
 		assertTrue(RISC_AR5.registers.getCarryFlag()=='0');
 		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
 		assertTrue(RISC_AR5.registers.getNegativeFlag()=='1');
 		
 		RISC_AR5.step();
-		assertTrue(RISC_AR5.memory.getAddress("130").equals("11111010"));
+		assertTrue(RISC_AR5.memory.getAddress("130").equals("11111011"));
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='0');
 		assertTrue(RISC_AR5.registers.getCarryFlag()=='0');
 		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
-		assertTrue(RISC_AR5.registers.getNegativeFlag()=='0');
+		assertTrue(RISC_AR5.registers.getNegativeFlag()=='1');
 		
 		RISC_AR5.step();
-		assertTrue(RISC_AR5.registers.getAcc().equals("00111100"));
+		assertTrue(RISC_AR5.registers.getAcc().equals("01000010"));
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='0');
 		assertTrue(RISC_AR5.registers.getCarryFlag()=='0');
-		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
+		assertTrue(RISC_AR5.registers.getOverflowFlag()=='1');
 		assertTrue(RISC_AR5.registers.getNegativeFlag()=='0');
 		
 		//Since 250 is not defined, stepping and trying to load this memory will
@@ -144,7 +143,7 @@ public class HappyHourTest {
 		assertTrue(RISC_AR5.registers.getAcc().equals("10101010"));
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='0');
 		assertTrue(RISC_AR5.registers.getCarryFlag()=='0');
-		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
+		assertTrue(RISC_AR5.registers.getOverflowFlag()=='1');
 		assertTrue(RISC_AR5.registers.getNegativeFlag()=='1');
 		
 		//This instruction uses the previous operation. Since we assumed that
@@ -155,17 +154,16 @@ public class HappyHourTest {
 		assertTrue(RISC_AR5.registers.getRegister("001").equals("10101010"));
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='0');
 		assertTrue(RISC_AR5.registers.getCarryFlag()=='0');
-		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
-		assertTrue(RISC_AR5.registers.getNegativeFlag()=='0');
+		assertTrue(RISC_AR5.registers.getOverflowFlag()=='1');
+		assertTrue(RISC_AR5.registers.getNegativeFlag()=='1');
 		
 		RISC_AR5.step();
 		assertTrue(RISC_AR5.registers.getAcc().equals("01010110"));
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='0');
 		assertTrue(RISC_AR5.registers.getCarryFlag()=='0');
-		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
+		assertTrue(RISC_AR5.registers.getOverflowFlag()=='1');
 		assertTrue(RISC_AR5.registers.getNegativeFlag()=='0');
 		
-		//Why does she say there is no carry? That is not true in this example.
 		RISC_AR5.step();
 		assertTrue(RISC_AR5.registers.getAcc().equals("00000000"));
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='1');
@@ -179,11 +177,10 @@ public class HappyHourTest {
 		
 		//skips to 40 (28 hex)
 		
-		//Why does she say all flags stay the same?
 		RISC_AR5.step();
 		assertTrue(RISC_AR5.registers.getAcc().equals("01001110"));
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='0');
-		assertTrue(RISC_AR5.registers.getCarryFlag()=='0');
+		assertTrue(RISC_AR5.registers.getCarryFlag()=='1');
 		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
 		assertTrue(RISC_AR5.registers.getNegativeFlag()=='0');
 		
