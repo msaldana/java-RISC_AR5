@@ -9,7 +9,6 @@ import uprm.ece.icom4215.exceptions.InvalidAddressException;
 import uprm.ece.icom4215.exceptions.InvalidAddressValueException;
 import uprm.ece.icom4215.exceptions.InvalidProgramCounterException;
 import uprm.ece.icom4215.exceptions.UnsupportedInstructionException;
-import uprm.ece.icom4215.util.NotationConversion;
 
 /**
  * Represents the instruction set of the RISC AR5 architecture. 
@@ -135,43 +134,43 @@ public class InstructionSet {
 			else if(op.equals("BRZ")){
 				//Implicit Addressing: don't care about bits in instruction.
 				//Need operand in accumulator (A)
-				//this.brz();
+				this.brz();
 			}
 			else if(op.equals("BRC")){
 				//Implicit Addressing: don't care about bits in instruction.
 				//Need operand in accumulator (A)
-				//this.brc();
+				this.brc();
 			}
 			else if(op.equals("BRN")){
 				//Implicit Addressing: don't care about bits in instruction.
 				//Need operand in accumulator (A)
-				//this.brn();
+				this.brn();
 			}
 			else if(op.equals("BRO")){
 				//Implicit Addressing: don't care about bits in instruction.
 				//Need operand in accumulator (A)
-				//this.bro();
+				this.bro();
 			}
 			else if(op.equals("STOP")){
 				//Implicit Addressing: don't care about bits in instruction.
 				//Need operand in accumulator (A)
-				//this.stop();
+				this.stop();
 			}
 			else if(op.equals("NOP")){
 				//Implicit Addressing: don't care about bits in instruction.
 				//Need operand in accumulator (A)
-				//this.nop();
+				this.nop();
 			}
 
 			else{
 				//Error Exception RISC AR5 Unsupported Instruction
-				throw new UnsupportedInstructionException("The instruction - "+instruction+ " - is not" +
+				throw new UnsupportedInstructionException("The instruction - "+instruction+ " - is not\n" +
 						"supported by the RISC AR5 architecture.");
 			}
 		}
 		else{
 			throw new InvalidAddressValueException("An instruction in the RISC_AR5 must be" +
-					" a 16-bit word. The word - "+instruction+ " - is not valid.");
+					" a \n16-bit word. The word - "+instruction+ " - \nis not valid.");
 		}
 	}
 
@@ -813,7 +812,7 @@ public class InstructionSet {
 	 * to be executed will be that located in the general purpose register R7.
 	 */
 	public void brz() {
-		if(RISC_AR5.registers.getSR().charAt(0)=='1'){
+		if(RISC_AR5.registers.getZeroFlag()=='1'){
 			try {
 				RISC_AR5.registers.setPC(RISC_AR5.registers.getRegister("111"));
 			} catch (InvalidProgramCounterException e) {
@@ -893,14 +892,12 @@ public class InstructionSet {
 	public void stop(){
 
 		RISC_AR5.stop();
-		RISC_AR5.registers.clearSR();
 	}
 
 
 	/**
 	 * No operation instruction.
 	 */
-	@SuppressWarnings("unused")
 	private void nop() {}
 
 }

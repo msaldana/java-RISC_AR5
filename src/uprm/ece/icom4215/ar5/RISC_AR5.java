@@ -3,13 +3,25 @@ package uprm.ece.icom4215.ar5;
 import uprm.ece.icom4215.components.InstructionSet;
 import uprm.ece.icom4215.components.Memory;
 import uprm.ece.icom4215.components.Registers;
+import uprm.ece.icom4215.exceptions.InvalidAddressValueException;
+import uprm.ece.icom4215.exceptions.UnsupportedInstructionException;
 
+/**
+ * Represents the RISC_AR5 microprocessor. Usage of this class
+ * is done in a static way. Simply call the init() method, load
+ * the memory and start the fetch-execute cycle. 
+ *
+ */
 public class RISC_AR5 {
 	public static Memory memory;
 	public static Registers registers;
 	public static InstructionSet instructions;
 	private static boolean stop;
 	
+	/**
+	 * Statically initialize the microprocessor so that
+	 * it can be used freely by all components.
+	 */
 	public static void init(){
 		memory = new Memory();
 		registers = new Registers();
@@ -17,65 +29,45 @@ public class RISC_AR5 {
 		stop = false;
 	}
 	
+	/**
+	 * Sets the stop condition to true, indicating that
+	 * the main program has finished all instructions.
+	 */
 	public static void stop(){
 		stop = true;
 	}
 	
-	public static void main(String[] args){
-		RISC_AR5.init();
-		
-		
-		try{
-		registers.setRegister("000", "01010101");
-		registers.setAcc("10101010");
-		instructions.next("0001100011110000");
-		
-		
-		registers.setAcc("01010101");
-		registers.setRegister("000", "01010101");
-		instructions.next("0001100000000000");
-		System.out.println("ADD Op successful: " +"10101010".equals(registers.getAcc()));
-		registers.printFlags();
-		
-		registers.setAcc("10101010");
-		registers.setRegister("000", "01010101");
-		instructions.next("0000000000000000");
-		System.out.println("AND Op successful: "+"00000000".equals(registers.getAcc()));
-		
-
-		registers.setAcc("10101011");
-		instructions.next("0011000000000000");
-		System.out.println("NEG Op successful: "+"01010101".equals(registers.getAcc()));
-		
-		instructions.next("0011100000000000");
-		System.out.println("NOT Op successful: "+"10101010".equals(registers.getAcc()));
-		
-		instructions.next("0100000100000000");
-		System.out.println("RLC Op successful: "+"01010101".equals(registers.getAcc()));
-		
-		instructions.next("0100010000000000");
-		System.out.println("RRC Op successful: "+ "10101010".equals(registers.getAcc()));
-		
-		memory.setAddress("2", "00000000");
-		memory.setAddress("3", "00000000");
-		registers.setPC("00000010");
-		System.out.println(registers.getPC());
-		
-		registers.setAcc("00001010");
-		registers.setRegister("000", "00000110");
-		instructions.next("0010100000000000");
-		System.out.println("MUL Op successful: "+ "00111100".equals(registers.getAcc()));
-		registers.printFlags();
-		
-		
-
-		}
-		
-		catch(Exception e){
+	/**
+	 * Returns a status detailing whether the main
+	 * program is stopped or still running.
+	 * @return
+	 */
+	public static boolean isStopped(){
+		return stop;
+	}
+	
+	/**
+	 * Executes the next instruction according to the program
+	 * counter.
+	 */
+	public static void step(){
+		registers.setIR();
+		String IR = registers.getIR();
+		String opcode = IR.substring(0,5);
+		try {
+			instructions.next(IR);
+			//Don't increment if branch.
+			if(!opcode.equals("10000")&&!opcode.equals("10001")&&!opcode.equals("10010")
+					&&!opcode.equals("10011"))
+			registers.incrementPC();
+			
+		} catch (InvalidAddressValueException e) {
+			// Instruction is not a 16 bit word.
+			e.printStackTrace();
+		} catch (UnsupportedInstructionException e) {
+			// Opcode does not belong to a specified operation.
 			e.printStackTrace();
 		}
-		
-		
-		
 	}
+	
 }
