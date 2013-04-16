@@ -81,6 +81,39 @@ public class Registers {
 	public String getAcc(){
 		return registers.get("Acc");
 	}
+	
+	/**
+	 * Returns the zero flag.
+	 * @return
+	 */
+	public char getZeroFlag(){
+		return getSR().charAt(0);
+	}
+	
+	/**
+	 * Returns the carry bit.
+	 * @return
+	 */
+	public char getCarryFlag(){
+		return getSR().charAt(1);
+	}
+	
+	/**
+	 * Returns the negative bit.
+	 * @return
+	 */
+	public char getNegativeFlag(){
+		return getSR().charAt(2);
+	}
+	
+	/**
+	 * Returns the overflow bit.
+	 * @return
+	 */
+	public char getOverflowFlag(){
+		return getSR().charAt(3);
+		
+	}
 	/**
 	 * Returns the 8-bit word representing the general purpose register RX.
 	 * @return
@@ -225,8 +258,8 @@ public class Registers {
 		} else
 			try {
 				if(RISC_AR5.memory.getAddress(address+"").trim().isEmpty()){
-					throw new InvalidProgramCounterException("The program counter must not hold the" +
-							"address of an emtpy space in memory. This will cause the Instruction" +
+					throw new InvalidProgramCounterException("The program counter must not hold the " +
+							"address of an emtpy space in memory. This will cause the Instruction " +
 							"Register to try to excute a null instruction.");
 				}
 				else{

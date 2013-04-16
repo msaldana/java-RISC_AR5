@@ -23,16 +23,18 @@ public class RISC_AR5 {
 	
 	public static void main(String[] args){
 		RISC_AR5.init();
+		
+		
 		try{
 		registers.setRegister("000", "01010101");
 		registers.setAcc("10101010");
-		instructions.next("000110001111");
+		instructions.next("0001100011110000");
 		
 		
-		registers.setAcc("11111111");
-		registers.setRegister("000", "11111111");
+		registers.setAcc("01010101");
+		registers.setRegister("000", "01010101");
 		instructions.next("0001100000000000");
-		System.out.println("ADD Op successful: " +"11111110".equals(registers.getAcc()));
+		System.out.println("ADD Op successful: " +"10101010".equals(registers.getAcc()));
 		registers.printFlags();
 		
 		registers.setAcc("10101010");
@@ -53,6 +55,14 @@ public class RISC_AR5 {
 		
 		instructions.next("0100010000000000");
 		System.out.println("RRC Op successful: "+ "10101010".equals(registers.getAcc()));
+		
+		memory.setAddress("2", "00000000");
+		memory.setAddress("3", "00000000");
+		registers.setPC("00000010");
+		System.out.println(registers.getPC());
+		
+		System.out.println(Integer.toHexString((int)'/'));
+
 		}
 		
 		catch(Exception e){
