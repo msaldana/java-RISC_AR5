@@ -197,9 +197,8 @@ public class InstructionSet {
 
 			//Carry and overflow are unchanged. Only
 			//interest here is the zero flag and negative.
-			if(Integer.parseInt(result.toString(),2)==0)
-				RISC_AR5.registers.setZeroBit(true);
-				RISC_AR5.registers.setNegativeBit(result.charAt(0)=='1');
+			RISC_AR5.registers.setZeroBit(Integer.parseInt(result.toString(),2)==0);
+			RISC_AR5.registers.setNegativeBit(result.charAt(0)=='1');
 		} 
 
 		catch (InvalidAddressException e) {
@@ -236,9 +235,7 @@ public class InstructionSet {
 
 			//Carry and overflow are not used. Only interest
 			//here is the zero and negative flags.
-			RISC_AR5.registers.clearSR();
-			if(Integer.parseInt(result.toString(),2)==0)
-				RISC_AR5.registers.setZeroBit(true);
+			RISC_AR5.registers.setZeroBit(Integer.parseInt(result.toString(),2)==0);
 			RISC_AR5.registers.setNegativeBit(result.charAt(0)=='1');
 		} 
 		catch (InvalidAddressException e) {
@@ -317,23 +314,17 @@ public class InstructionSet {
 			//must be met: most significant bit in the accumulator must be equal to the most 
 			//significant bit in the register, and the selected accumulator's bit must be different
 			//from the results most significant bit.
-			accBit = Integer.parseInt(acc.substring(0));
-			registerBit = Integer.parseInt(bitValue.substring(0));
+			accBit = Integer.parseInt(acc.charAt(0)+"");
+			registerBit = Integer.parseInt(bitValue.charAt(0)+"");
 
-			if(accBit == registerBit && Integer.parseInt(result.charAt(0)+"")!=accBit){
-				RISC_AR5.registers.setOverflowBit(true);
-			}
+			RISC_AR5.registers.setOverflowBit(accBit == registerBit && 
+					Integer.parseInt(result.charAt(0)+"")!=accBit);
 
 			//If the result is zero, set the zero flag
-			if (Integer.parseInt(result.toString(),2)==0){
-				RISC_AR5.registers.setZeroBit(true);
-			}
+			RISC_AR5.registers.setZeroBit(Integer.parseInt(result.toString(),2)==0);
 
 			//If the most significant bit is 1, negative flag true.
-			if(result.charAt(0) =='1'){
-				RISC_AR5.registers.setNegativeBit(true);
-			}
-
+			RISC_AR5.registers.setNegativeBit(result.charAt(0) =='1');
 			if(result.length()==8){
 				RISC_AR5.registers.setAcc(result.toString());
 			}
@@ -479,14 +470,14 @@ public class InstructionSet {
 
 		String acc, reg, result;
 		int decResult;
-		
+
 		//Multiplier only uses the last 4 bits of the accumulator.
 		acc = RISC_AR5.registers.getAcc().substring(4);
-		
+
 		try {
 			//Multiplier only uses the last 4 bits of the register.
 			reg = RISC_AR5.registers.getRegister(rf).substring(4);
-			
+
 			decResult = Integer.parseInt(acc,2)*Integer.parseInt(reg,2);
 
 			//Bring result of operation back to Binary. Extends the word to 
@@ -512,18 +503,12 @@ public class InstructionSet {
 					RISC_AR5.registers.setOverflowBit(true);
 				if(acc.charAt(0)!=reg.charAt(0) && result.charAt(0)=='0')
 					RISC_AR5.registers.setOverflowBit(true);
-				*/
+				 */
 				//If the result is zero, set the zero flag
-				if (Integer.parseInt(result.toString(),2)==0){
-					RISC_AR5.registers.setZeroBit(true);
-				}
+				RISC_AR5.registers.setZeroBit(Integer.parseInt(result.toString(),2)==0);
 
 				//If the most significant bit is 1, negative flag true.
-				if(result.charAt(0) =='1'){
-					RISC_AR5.registers.setNegativeBit(true);
-				}
-				
-				
+				RISC_AR5.registers.setNegativeBit(result.charAt(0) =='1');	
 			}
 		} 
 		catch (InvalidAddressException e) {
@@ -636,12 +621,10 @@ public class InstructionSet {
 			//For this operation, overflow is unchanged.
 			//We consider the operation to be an arithmetic value in two's compliment,
 			//thus we will set the negative flag.
-			if(result.charAt(0)=='1')
-				RISC_AR5.registers.setNegativeBit(true);
+			RISC_AR5.registers.setNegativeBit(result.charAt(0)=='1');
 
 			//Set the zero flag
-			if(Integer.parseInt(result.toString(),2)==0)
-				RISC_AR5.registers.setZeroBit(true);
+			RISC_AR5.registers.setZeroBit(Integer.parseInt(result.toString(),2)==0);
 			//The carry flag will contain the bit that was shifted out of the 
 			//8-bit word.
 			RISC_AR5.registers.setCarryBit(acc.charAt(0)=='1');
@@ -661,7 +644,6 @@ public class InstructionSet {
 	private void rrc(){
 		String acc = RISC_AR5.registers.getAcc();
 		StringBuilder result = new StringBuilder();
-		RISC_AR5.registers.clearSR();
 
 		result.append(RISC_AR5.registers.getCarryFlag());
 		for (int i=0; i<7;i++){
@@ -673,12 +655,10 @@ public class InstructionSet {
 			//For this operation, the overflow is unchanged. We consider the operation 
 			//to be an arithmetic value in two's compliment, thus we will
 			//set the negative flag.
-			if(result.charAt(0)=='1')
-				RISC_AR5.registers.setNegativeBit(true);
+			RISC_AR5.registers.setNegativeBit(result.charAt(0)=='1');
 
 			//Set the zero flag
-			if(Integer.parseInt(result.toString(),2)==0)
-				RISC_AR5.registers.setZeroBit(true);
+			RISC_AR5.registers.setZeroBit(Integer.parseInt(result.toString(),2)==0);
 			//The carry flag will contain the bit that was shifted out of the 
 			//8-bit word.
 			RISC_AR5.registers.setCarryBit(acc.charAt(7)=='1');
