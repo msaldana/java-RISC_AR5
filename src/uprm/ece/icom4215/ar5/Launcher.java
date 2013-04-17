@@ -440,8 +440,7 @@ public class Launcher extends JFrame {
 		updateRegisters();
 		updateMemory();
 		try {
-			KBTextField = new JTextField((char)Integer.parseInt(
-					RISC_AR5.memory.getAddress("251"),2)+"",2);
+			
 			DisplayTextField.setText(((char)Integer.parseInt(RISC_AR5.memory.getAddress("252"),2)+"")+
 					((char)Integer.parseInt(RISC_AR5.memory.getAddress("253"),2)+"")+
 					((char)Integer.parseInt(RISC_AR5.memory.getAddress("254"),2)+"")+
