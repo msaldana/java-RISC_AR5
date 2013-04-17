@@ -10,6 +10,7 @@ import java.util.Scanner;
 import uprm.ece.icom4215.exceptions.InvalidAddressException;
 import uprm.ece.icom4215.exceptions.InvalidAddressValueException;
 import uprm.ece.icom4215.exceptions.InvalidMemoryFileSizeException;
+import uprm.ece.icom4215.util.GarbageGenerator;
 import uprm.ece.icom4215.util.NotationConversion;
 
 /**
@@ -37,7 +38,7 @@ public class Memory {
 	 */
 	public Memory(){
 		for(int i =0; i<256; i++)
-			memory.put(i+"","");
+			memory.put(i+"",GarbageGenerator.generate8BitWord());
 	}
 
 	/**
@@ -45,7 +46,7 @@ public class Memory {
 	 */
 	public void reset(){
 		for(int i = 0; i< 256; i++)
-			memory.put(i+"","");
+			memory.put(i+"",GarbageGenerator.generate8BitWord());
 	}
 
 	/**
@@ -215,6 +216,23 @@ public class Memory {
 			e.printStackTrace();
 		}
 
+	}
+	
+	/**
+	 * Utility method-
+	 * Returns the entire contents of the memory as a string of the form:
+	 * 00: 00110011
+	 * 02: 01111101
+	 * .
+	 * .
+	 * .
+	 * FF: 01001110
+	 */
+	public String memoryToString(){
+		String str = "";		
+		for (int i=0; i<256; i++)
+			str += NotationConversion.intToHex(i).toUpperCase() + ": " + memory.get(""+i) + "\n";
+		return str;
 	}
 
 }

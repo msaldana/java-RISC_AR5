@@ -114,6 +114,7 @@ public class HappyHourTest {
 		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
 		assertTrue(RISC_AR5.registers.getNegativeFlag()=='0');
 		
+		//No carry flag.
 		RISC_AR5.step();
 		assertTrue(RISC_AR5.registers.getAcc().equals("11111011"));
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='0');
@@ -128,11 +129,17 @@ public class HappyHourTest {
 		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
 		assertTrue(RISC_AR5.registers.getNegativeFlag()=='1');
 		
+		/**If no overflow occurs then we can set this to 0 from the program
+		 * and no problem. However, our discussion led to the conclusion that
+		 * if the two significant bits of the operands are the same the result
+		 * must be positive (0 in MSB) otherwise, it should be negative (1 in MSB).
+		 * If this doesn't occur, we throw an overflow. 
+		 */
 		RISC_AR5.step();
 		assertTrue(RISC_AR5.registers.getAcc().equals("01000010"));
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='0');
 		assertTrue(RISC_AR5.registers.getCarryFlag()=='0');
-		assertTrue(RISC_AR5.registers.getOverflowFlag()=='1');
+		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
 		assertTrue(RISC_AR5.registers.getNegativeFlag()=='0');
 		
 		//Since 250 is not defined, stepping and trying to load this memory will
@@ -143,7 +150,7 @@ public class HappyHourTest {
 		assertTrue(RISC_AR5.registers.getAcc().equals("10101010"));
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='0');
 		assertTrue(RISC_AR5.registers.getCarryFlag()=='0');
-		assertTrue(RISC_AR5.registers.getOverflowFlag()=='1');
+		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
 		assertTrue(RISC_AR5.registers.getNegativeFlag()=='1');
 		
 		//This instruction uses the previous operation. Since we assumed that
@@ -154,14 +161,16 @@ public class HappyHourTest {
 		assertTrue(RISC_AR5.registers.getRegister("001").equals("10101010"));
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='0');
 		assertTrue(RISC_AR5.registers.getCarryFlag()=='0');
-		assertTrue(RISC_AR5.registers.getOverflowFlag()=='1');
+		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
 		assertTrue(RISC_AR5.registers.getNegativeFlag()=='1');
 		
+		//Since overflow occurs on the step before, this is unchanged by the 
+		//two's compliment negate operation.
 		RISC_AR5.step();
 		assertTrue(RISC_AR5.registers.getAcc().equals("01010110"));
 		assertTrue(RISC_AR5.registers.getZeroFlag()=='0');
 		assertTrue(RISC_AR5.registers.getCarryFlag()=='0');
-		assertTrue(RISC_AR5.registers.getOverflowFlag()=='1');
+		assertTrue(RISC_AR5.registers.getOverflowFlag()=='0');
 		assertTrue(RISC_AR5.registers.getNegativeFlag()=='0');
 		
 		RISC_AR5.step();

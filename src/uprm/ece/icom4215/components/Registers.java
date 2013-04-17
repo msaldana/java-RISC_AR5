@@ -6,6 +6,7 @@ import uprm.ece.icom4215.ar5.RISC_AR5;
 import uprm.ece.icom4215.exceptions.InvalidAddressException;
 import uprm.ece.icom4215.exceptions.InvalidAddressValueException;
 import uprm.ece.icom4215.exceptions.InvalidProgramCounterException;
+import uprm.ece.icom4215.util.GarbageGenerator;
 import uprm.ece.icom4215.util.NotationConversion;
 
 /**
@@ -39,16 +40,17 @@ public class Registers {
 	public Registers(){
 		registers.put("PC", "00000000");
 		registers.put("SR", "0000");
-		registers.put("IR", "");
-		registers.put("Acc", "00000000");
-		registers.put("R0", "");
-		registers.put("R1", "");
-		registers.put("R2", "");
-		registers.put("R3", "");
-		registers.put("R4", "");
-		registers.put("R5", "");
-		registers.put("R6", "");
-		registers.put("R7", "");
+		registers.put("IR", GarbageGenerator.generate8BitWord()+
+							GarbageGenerator.generate8BitWord());
+		registers.put("Acc", GarbageGenerator.generate8BitWord());
+		registers.put("R0", GarbageGenerator.generate8BitWord());
+		registers.put("R1", GarbageGenerator.generate8BitWord());
+		registers.put("R2", GarbageGenerator.generate8BitWord());
+		registers.put("R3", GarbageGenerator.generate8BitWord());
+		registers.put("R4", GarbageGenerator.generate8BitWord());
+		registers.put("R5", GarbageGenerator.generate8BitWord());
+		registers.put("R6", GarbageGenerator.generate8BitWord());
+		registers.put("R7", GarbageGenerator.generate8BitWord());
 	}
 
 	/**

@@ -81,5 +81,20 @@ public class NotationConversion {
 		return Integer.parseInt(binary, 2)+"";
 	}
 	
+	/**
+	 * INT to HEX (2 digits)
+	 */
+	public static String intToHex(int n) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(Integer.toHexString(n));
+		if (sb.length() < 2) {
+			sb.insert(0, '0'); // pad with leading zero if needed
+		}
+		
+		String hex = sb.toString();
+		return hex;
+	}
+
+	
 
 }

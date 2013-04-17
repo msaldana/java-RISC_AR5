@@ -503,6 +503,7 @@ public class InstructionSet {
 				//word. Thus, no carry bit is ever true. 
 				RISC_AR5.registers.clearSR();
 
+				/**
 				//Overflow will occur when the result's most significant bit is a 1 and both 
 				//operands have equal most significant bits; and when the operands have different
 				//signed bits in the most significant position, but the result has a 0 in the 
@@ -511,7 +512,7 @@ public class InstructionSet {
 					RISC_AR5.registers.setOverflowBit(true);
 				if(acc.charAt(0)!=reg.charAt(0) && result.charAt(0)=='0')
 					RISC_AR5.registers.setOverflowBit(true);
-				
+				*/
 				//If the result is zero, set the zero flag
 				if (Integer.parseInt(result.toString(),2)==0){
 					RISC_AR5.registers.setZeroBit(true);
