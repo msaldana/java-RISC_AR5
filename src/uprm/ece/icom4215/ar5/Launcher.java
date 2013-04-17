@@ -200,8 +200,8 @@ public class Launcher extends JFrame {
 
 		try {
 			KBTextField = new JTextField((char)Integer.parseInt(
-										RISC_AR5.memory.getAddress("251"),2)+"",2);
-										
+					RISC_AR5.memory.getAddress("251"),2)+"",2);
+
 		} catch (InvalidAddressException e) {
 			//Incorrect addressing - occurs if the parameter is a value not 
 			//between 0-255.
@@ -234,7 +234,18 @@ public class Launcher extends JFrame {
 		panelMiddle.add(DisplayLabel, gbc);
 
 		DisplayTextField = new JTextField(4);
-		DisplayTextField.setText("BF12");
+		try {
+			DisplayTextField.setText(((char)Integer.parseInt(RISC_AR5.memory.getAddress("252"),2)+"")+
+					((char)Integer.parseInt(RISC_AR5.memory.getAddress("253"),2)+"")+
+					((char)Integer.parseInt(RISC_AR5.memory.getAddress("254"),2)+"")+
+					((char)Integer.parseInt(RISC_AR5.memory.getAddress("255"),2)+""));
+		} catch (NumberFormatException e) {
+			// Number is not an 8 bit binary word
+			e.printStackTrace();
+		} catch (InvalidAddressException e) {
+			// Address is not between 252-255
+			e.printStackTrace();
+		}
 		DisplayTextField.setEditable(false);
 		DisplayTextField.setHorizontalAlignment(JTextField.CENTER);
 		gbc.gridwidth = 4;
@@ -377,6 +388,7 @@ public class Launcher extends JFrame {
 		panelBottom.add(stepButton);
 
 		runButton = new JButton("Run >>");
+		runButton.addActionListener(new RunButtonListener());
 		panelBottom.add(runButton);
 
 		this.add(panelTop, BorderLayout.NORTH);
@@ -423,6 +435,26 @@ public class Launcher extends JFrame {
 		}
 
 	}
+	
+	public void updateGUI() {
+		updateRegisters();
+		updateMemory();
+		try {
+			KBTextField = new JTextField((char)Integer.parseInt(
+					RISC_AR5.memory.getAddress("251"),2)+"",2);
+			DisplayTextField.setText(((char)Integer.parseInt(RISC_AR5.memory.getAddress("252"),2)+"")+
+					((char)Integer.parseInt(RISC_AR5.memory.getAddress("253"),2)+"")+
+					((char)Integer.parseInt(RISC_AR5.memory.getAddress("254"),2)+"")+
+					((char)Integer.parseInt(RISC_AR5.memory.getAddress("255"),2)+""));
+		} catch (NumberFormatException e) {
+			// Not an 8 bit word.
+			e.printStackTrace();
+		} catch (InvalidAddressException e) {
+			// Address not in range 0-255
+			e.printStackTrace();
+		}
+	}
+	
 
 	// Listener classes
 
@@ -444,13 +476,43 @@ public class Launcher extends JFrame {
 				JOptionPane.showMessageDialog(null, "All instructions have been executed!",
 						"End of Instructions", JOptionPane.WARNING_MESSAGE);
 				stepButton.setEnabled(false);
+				runButton.setEnabled(false);
 			}
 
 			System.out.println("result: "+RISC_AR5.registers.getIR() + " | Acc:" + RISC_AR5.registers.getAcc() + "\n");
 
 			//Update  the GUI's fields.
-			updateRegisters();            
-			updateMemory();            
+			updateGUI();            
+		}
+	}
+
+	/**
+	 * Handles the use of the "Run" GUI button. This listener will invoke the 
+	 * execution of all instructions until the a stop instruction is found.
+	 * When this happens, a message box will alert the user that no further
+	 * instructions can be made. Also the Run and Step buttons are deactivated. 
+	 *
+	 */
+	private class RunButtonListener implements ActionListener {
+
+		public void actionPerformed(ActionEvent e) {
+			while(!RISC_AR5.isStopped()){
+				//Execute the next instruction.
+				RISC_AR5.step();
+				//Disable Step if the stop instruction has been reached.
+				if(RISC_AR5.isStopped()){
+					//Alert user that no more instructions will be executed.
+					JOptionPane.showMessageDialog(null, "All instructions have been executed!",
+							"End of Instructions", JOptionPane.WARNING_MESSAGE);
+					stepButton.setEnabled(false);
+					runButton.setEnabled(false);
+				}
+
+				System.out.println("result: "+RISC_AR5.registers.getIR() + " | Acc:" + RISC_AR5.registers.getAcc() + "\n");
+
+				//Update  the GUI's fields.
+				updateGUI();            
+			}
 		}
 	}
 
